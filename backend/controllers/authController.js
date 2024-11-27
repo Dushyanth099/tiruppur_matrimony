@@ -69,7 +69,7 @@ exports.login = async (req, res) => {
   }
 };
 
-//biodata
+//biodata post
 exports.biodata = async (req, res) => {
   try {
     const bioData = new BioData(req.body); // Create a new BioData instance
@@ -80,6 +80,16 @@ exports.biodata = async (req, res) => {
     res.status(500).json({ error: "Failed to save BioData" });
   }
 }
+// New function for retrieving all biodata (GET)
+exports.getBiodata = async (req, res) => {
+  try {
+    const biodata = await BioData.find(); // Fetch all biodata from the database
+    res.status(200).json(biodata); // Return biodata in JSON format
+  } catch (error) {
+    console.error("Error fetching biodata:", error);
+    res.status(500).json({ error: "Failed to fetch biodata" });
+  }
+};
 
 
 
