@@ -1,9 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const BioData =require("../models/bioDataModel");
-const router = require("../routes/auth");
-
+const BioData = require("../models/bioDataModel");
+const { upload, storage } = require("../utils/upload");
 exports.register = async (req, res) => {
   const { userName, userEmail, userPassword } = req.body;
 
@@ -72,14 +71,82 @@ exports.login = async (req, res) => {
 //biodata post
 exports.biodata = async (req, res) => {
   try {
-    const bioData = new BioData(req.body); // Create a new BioData instance
-    await bioData.save(); // Save it to the database
-    res.status(201).json({ message: "BioData saved successfully!" });
+    // Handle file upload using multer
+    upload.single("photo")(req, res, async (err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Error uploading photo", error: err });
+      }
+
+      // Extract form data and the uploaded photo path
+      const {
+        name,
+        birthDate,
+        religion,
+        motherTongue,
+        caste,
+        subCaste,
+        gothram,
+        dosham,
+        maritalStatus,
+        height,
+        familyStatus,
+        familyType,
+        familyValues,
+        disability,
+        highestEducation,
+        employedIn,
+        occupation,
+        annualIncome,
+        workLocation,
+        state,
+        city,
+        about,
+      } = req.body;
+      const photoPath = req.file ? req.file.path : null; // Path to the uploaded photo file
+
+      // Create new BioData instance
+      const bioData = new BioData({
+        name,
+        birthDate,
+        religion,
+        motherTongue,
+        caste,
+        subCaste,
+        gothram,
+        dosham,
+        maritalStatus,
+        height,
+        familyStatus,
+        familyType,
+        familyValues,
+        disability,
+        highestEducation,
+        employedIn,
+        occupation,
+        annualIncome,
+        workLocation,
+        state,
+        city,
+        about,
+        photo: photoPath, // Save the photo path
+      });
+
+      // Save BioData to the database
+      try {
+        await bioData.save(); // Save BioData instance to the database
+        res.status(201).json({ message: "BioData saved successfully!" });
+      } catch (error) {
+        console.error("Error saving BioData:", error);
+        res.status(500).json({ error: "Failed to save BioData" });
+      }
+    });
   } catch (error) {
-    console.error("Error saving BioData:", error);
-    res.status(500).json({ error: "Failed to save BioData" });
+    console.error("Error in biodata post:", error);
+    res.status(500).json({ message: "Server error" });
   }
-}
+};
 // New function for retrieving all biodata (GET)
 exports.getBiodata = async (req, res) => {
   try {
@@ -90,7 +157,4 @@ exports.getBiodata = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch biodata" });
   }
 };
-
-
-
 

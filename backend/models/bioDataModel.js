@@ -23,6 +23,7 @@ const bioDataSchema = new mongoose.Schema(
     state: String,
     city: String,
     about: String,
+    photo:String
   },
   { timestamps: true }
 );
