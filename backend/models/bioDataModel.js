@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const bioDataSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     name: String,
     birthDate: Date,
     religion: String,
@@ -23,7 +28,7 @@ const bioDataSchema = new mongoose.Schema(
     state: String,
     city: String,
     about: String,
-    photo:String
+    photo: String,
   },
   { timestamps: true }
 );

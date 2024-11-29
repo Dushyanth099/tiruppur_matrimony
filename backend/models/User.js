@@ -1,10 +1,6 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  userName: {
-    type: String,
-    required: true,
-  },
   userEmail: {
     type: String,
     required: true,
@@ -13,6 +9,11 @@ const userSchema = new mongoose.Schema({
   userPassword: {
     type: String,
     required: true,
+  },
+  biodata: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "BioData",
+    required: false, // bioData is optional until it's filled
   },
 });
 

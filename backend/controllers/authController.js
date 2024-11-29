@@ -5,7 +5,7 @@ const BioData = require("../models/bioDataModel");
 const { upload, storage } = require("../utils/upload");
 
 exports.register = async (req, res) => {
-  const { userName, userEmail, userPassword } = req.body;
+  const { userEmail, userPassword } = req.body;
 
   try {
     // Check if user already exists
@@ -19,7 +19,6 @@ exports.register = async (req, res) => {
 
     // Create new user
     const newUser = new User({
-      userName,
       userEmail,
       userPassword: hashedPassword,
     });
@@ -32,18 +31,116 @@ exports.register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(201).json({ message: "Registration successful!", token });
+    res.status(201).json({
+      message: "Registration successful!",
+      userId: newUser._id,
+      token,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+// biodata post
+exports.biodata = async (req, res) => {
+ if (!req.user || !req.user.userId) {
+   return res.status(403).json({ message: "User authentication failed." });
+  }
+  const userId = req.user.userId;
+  try {
+    const {
+      name,
+      birthDate,
+      religion,
+      motherTongue,
+      caste,
+      subCaste,
+      gothram,
+      dosham,
+      maritalStatus,
+      height,
+      familyStatus,
+      familyType,
+      familyValues,
+      disability,
+      highestEducation,
+      employedIn,
+      occupation,
+      annualIncome,
+      workLocation,
+      state,
+      city,
+      about,
+    } = req.body;
+
+    const photoPath = req.file ? req.file.path : null;
+
+    const bioData = new BioData({
+      userId,
+      name,
+      birthDate,
+      religion,
+      motherTongue,
+      caste,
+      subCaste,
+      gothram,
+      dosham,
+      maritalStatus,
+      height,
+      familyStatus,
+      familyType,
+      familyValues,
+      disability,
+      highestEducation,
+      employedIn,
+      occupation,
+      annualIncome,
+      workLocation,
+      state,
+      city,
+      about,
+      photo: photoPath,
+    });
+
+    await bioData.save();
+
+    await User.findByIdAndUpdate(userId, { biodata: bioData._id });
+
+    res.status(201).json({ message: "BioData saved successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to save BioData" });
+  }
+};
+
+exports.authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Extract the token
+console.log("Authorization header:", authHeader);
+console.log("Extracted token:", token);
+
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ message: "Access denied. No token provided." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
+    req.user = decoded; // Attach user information to the request object
+  console.log("Decoded token:", decoded);
+    next(); // Proceed to the next middleware
+  } catch (error) {
+     console.error("Token validation error:", error.message);
+    res.status(403).json({ message: "Invalid or expired token" });
+  }
+};
 exports.login = async (req, res) => {
   const { userEmail, userPassword } = req.body;
 
   try {
-    // Find the user by email
     const user = await User.findOne({ userEmail });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -55,124 +152,35 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, userEmail: user.userEmail },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ message: "Login successful!", token });
+    res.status(200).json({
+      message: "Login successful!",
+      token,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-//biodata post
-// biodata post
-exports.biodata = async (req, res) => {
+// getallbiodatas
+exports.getAllBiodata = async (req, res) => {
   try {
-    // Handle file upload using multer
-    upload.single("photo")(req, res, async (err) => {
-      if (err) {
-        return res.status(500).json({ message: "Error uploading photo", error: err });
-      }
+    // Fetch all biodata entries, populate the user details if needed
+    const biodatas = await BioData.find().populate("userId", "userEmail name"); // You can customize this based on your needs
 
-      // Extract form data and the uploaded photo path
-      const {
-        name,
-        birthDate,
-        religion,
-        motherTongue,
-        caste,
-        subCaste,
-        gothram,
-        dosham,
-        maritalStatus,
-        height,
-        familyStatus,
-        familyType,
-        familyValues,
-        disability,
-        highestEducation,
-        employedIn,
-        occupation,
-        annualIncome,
-        workLocation,
-        state,
-        city,
-        about,
-      } = req.body;
-
-      const photoPath = req.file ? req.file.path : null; // Path to the uploaded photo file
-
-      // Get the logged-in user's ID from the JWT token (you need to pass the token in the request headers)
-      const userId = req.user.userId; // assuming `userId` is decoded and available
-
-      // Create new BioData instance
-      const bioData = new BioData({
-        userId, // Associate biodata with the userId
-        name,
-        birthDate,
-        religion,
-        motherTongue,
-        caste,
-        subCaste,
-        gothram,
-        dosham,
-        maritalStatus,
-        height,
-        familyStatus,
-        familyType,
-        familyValues,
-        disability,
-        highestEducation,
-        employedIn,
-        occupation,
-        annualIncome,
-        workLocation,
-        state,
-        city,
-        about,
-        photo: photoPath, // Save the photo path
-      });
-
-      // Save BioData to the database
-      try {
-        await bioData.save(); // Save BioData instance to the database
-
-        // Update user record with the biodata ID (optional, but could be helpful)
-        await User.findByIdAndUpdate(userId, {
-          biodata: bioData._id, // Linking biodata to user
-        });
-
-        res.status(201).json({ message: "BioData saved successfully!" });
-      } catch (error) {
-        console.error("Error saving BioData:", error);
-        res.status(500).json({ error: "Failed to save BioData" });
-      }
-    });
-  } catch (error) {
-    console.error("Error in biodata post:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-// New function for retrieving biodata of the logged-in user
-exports.getBiodata = async (req, res) => {
-  try {
-    const userId = req.user.userId; // Get the userId from the JWT token
-
-    // Fetch the biodata associated with the logged-in user
-    const biodata = await BioData.findOne({ userId: userId });
-
-    if (!biodata) {
-      return res.status(404).json({ message: "Biodata not found" });
+    if (!biodatas || biodatas.length === 0) {
+      return res.status(404).json({ message: "No biodata available" });
     }
 
-    res.status(200).json(biodata); // Return biodata in JSON format
-  } catch (error) {
-    console.error("Error fetching biodata:", error);
-    res.status(500).json({ error: "Failed to fetch biodata" });
+    res.status(200).json(biodatas);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
