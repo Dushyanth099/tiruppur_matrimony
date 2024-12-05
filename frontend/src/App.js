@@ -11,6 +11,7 @@ import UpdateProfile from "./components/Profile/UpdateProfile";
 import Search from "./components/Search/Search";
 import SearchPreferencePage from "./components/SearchPreference/SearchPreference";
 import SearchResultsPage from "./components/SearchPreference/SearchResultsPage";
+import Profilecards from "./components/Profilecards/Profilecards";
 function App() {
   return (
     <div className="App">
@@ -32,6 +33,7 @@ function App() {
         <Route path="/BioData" element={<BioData />} />
 
         {/* LandingPage */}
+        <Route path="/ProfileCards" element={<Profilecards />} />
         <Route path="/LandingPage" element={<LandingPage />} />
         <Route path="/current-user" element={<CurrentUser />} />
         <Route path="/update-profile" element={<UpdateProfile />} />

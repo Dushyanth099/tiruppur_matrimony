@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profilecards.css";
+import { useNavigate } from "react-router-dom";
 
-const Profilecards = () => {
+const Profilecards = ({ showNavbar = true }) => {
   const [biodata, setBiodata] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedIndex, setExpandedIndex] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBiodata = async () => {
@@ -150,16 +152,37 @@ const Profilecards = () => {
   }
 
   return (
-    <div className="container-fluid my-5">
-      <h1 className="text-center mb-4">Registered Users</h1>
-      <div className="row">
-        {biodata.length > 0 ? (
-          biodata.map((userData, index) => renderProfileCard(userData, index))
-        ) : (
-          <p className="text-center">No profiles available</p>
-        )}
+    <>
+      {/* Render navbar only if showNavbar is true */}
+      {showNavbar && (
+        <nav className="navbar navbar-expand-lg navbar-light bg-warning">
+          <div className="container-fluid">
+            <a className="navbar-brand" href="/LandingPage">
+              Tiruppur Matrimony
+            </a>
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <button
+                  className="btn btn-dark mx-2"
+                  onClick={() => navigate("/LandingPage")}
+                >
+                  HomePage
+                </button>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      )}
+      <div className="container-fluid my-5">
+        <div className="row">
+          {biodata.length > 0 ? (
+            biodata.map((userData, index) => renderProfileCard(userData, index))
+          ) : (
+            <p className="text-center">No profiles available</p>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

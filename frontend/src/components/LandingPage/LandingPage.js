@@ -29,7 +29,7 @@ const LandingPage = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/LandingPage">
+              <a className="nav-link" href="/ProfileCards">
                 Matches
               </a>
             </li>
@@ -113,7 +113,7 @@ const LandingPage = () => {
 
           {/* Right Side: Profile Cards */}
           <div className="col-md-8">
-            <Profilecards />
+            <Profilecards showNavbar={false} />
           </div>
         </div>
       </div>
