@@ -1,0 +1,81 @@
+/* Update Profile Container */
+.update-profile {
+  max-width: 800px;
+  margin: auto;
+  background: #f8f9fa; /* Light background */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+}
+
+/* Heading Styling */
+.update-profile h2 {
+  font-size: 2rem;
+  color: #007bff; /* Bootstrap primary blue */
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Form Control Styling */
+.update-profile .form-control {
+  border-radius: 6px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+  margin-bottom: 15px; /* Spacing between fields */
+}
+
+/* Alert Styling */
+.update-profile .alert {
+  font-size: 0.9rem;
+  margin-bottom: 20px; /* Space below alert */
+}
+
+/* General Button Styling */
+.btn {
+  font-size: 16px; /* Readable font size */
+  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 8px; /* Smooth rounded corners */
+  transition: all 0.3s ease-in-out; /* Smooth hover and transition effect */
+  text-align: center;
+  cursor: pointer; /* Pointer cursor for buttons */
+}
+
+/* Success Button */
+.btn-success {
+  background-color: #28a745; /* Success green */
+  border: none;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #218838; /* Darker green on hover */
+  transform: scale(1.05); /* Slight scale-up for hover effect */
+}
+
+/* Warning Button */
+.btn-warning {
+  background-color: #ffc107; /* Warning yellow */
+  border: none;
+  color: black;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800; /* Darker yellow on hover */
+  transform: scale(1.05); /* Slight scale-up for hover effect */
+}
+
+/* Block Buttons in Container */
+.btn-block {
+  width: 100%; /* Full width for small screens */
+  max-width: 300px; /* Limit maximum width */
+  margin: 15px auto; /* Center with spacing between */
+}
+
+/* Responsive Styling for Buttons */
+@media (min-width: 768px) {
+  .btn-block {
+    display: inline-block; /* Inline buttons for larger screens */
+    width: auto; /* Adjust to content width */
+    margin: 10px 10px; /* Uniform spacing between buttons */
+  }
+}

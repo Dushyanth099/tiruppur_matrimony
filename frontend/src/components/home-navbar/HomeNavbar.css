@@ -1,0 +1,126 @@
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu&display=swap");
+
+.home-navbar {
+  font-family: "Ubuntu", sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color:yellow; /* Bright yellow for brand focus */
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+  transition: color 0.3s ease-in-out;
+  text-align: left;
+  margin-bottom: 0; /* Ensure no unwanted bottom margin */
+}
+
+.navbar-brand:hover {
+  color: #fff; /* Change to white on hover */
+}
+
+.navbar-tagline {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: -5px;
+  text-align: left; /* Left align on larger screens */
+}
+
+.navbar-btn {
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.navbar-btn:hover {
+  transform: scale(1.1); /* Slight zoom effect */
+}
+
+/* Custom Hover Colors */
+.btn-warning {
+  background-color: #ffc107;
+  color: #000;
+
+  &:hover {
+    background-color: #e0a800;
+    color: #fff;
+  }
+}
+
+.btn-outline-light {
+  border: 2px solid #fff;
+  color: #fff;
+
+  &:hover {
+    background-color: #fff;
+    color: #000;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .navbar-brand {
+    font-size: 2.2rem; /* Slightly smaller font size on medium screens */
+    text-align: center; /* Center brand name */
+  }
+
+  .navbar-tagline {
+    font-size: 0.9rem;
+    text-align: center; /* Center tagline */
+    margin-top: 0;
+  }
+
+  .navbar-btn {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 2rem; /* Smaller font size for tablets */
+    text-align: center; /* Center brand name */
+  }
+
+  .navbar-tagline {
+    font-size: 0.9rem;
+    text-align: center; /* Center tagline */
+    margin-top: 0;
+  }
+
+  .navbar-btn {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .col-md-6 {
+    text-align: center; /* Center content in medium screens */
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-brand {
+    font-size: 1.8rem; /* Further reduce font size on mobile */
+    text-align: center; /* Center brand name */
+  }
+
+  .navbar-tagline {
+    font-size: 0.8rem;
+    text-align: center; /* Center tagline */
+    margin-top: 0;
+  }
+
+  .navbar-btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  .col-12 {
+    text-align: center; /* Center content on smaller screens */
+  }
+}

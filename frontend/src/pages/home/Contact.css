@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap');
+
+.Contact-container {
+  font-family: 'Open Sans', sans-serif;
+
+  /* General Container Styling */
+  .container {
+    padding: 0 15px;
+  }
+
+  /* Stats Section */
+  .stat-box {
+    padding: 30px;
+    background-color: #f9f9f9; /* Light background */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center; /* Centered text in stats */
+    
+    &:hover {
+      background-color: #c9de26; /* Soft yellow background on hover */
+      transform: translateY(-5px); /* Slight lift effect */
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #007bff; /* Blue color */
+    }
+
+    .stat-label {
+      font-size: 1.2rem;
+      color: #555; /* Slightly dark gray */
+    }
+  }
+
+  /* Heading Styling */
+  h2, h3, h4, h5 {
+    color: #007bff; /* Primary blue */
+    font-weight: 600;
+  }
+
+  /* Paragraph Styling */
+  p {
+    color: #555; /* Dark gray text */
+    font-size: 1.1rem;
+  }
+
+  /* Contact Section */
+  .contact-section {
+    margin-top: 50px;
+
+    .col-md-6 {
+      margin-bottom: 30px;
+    }
+
+    h4 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333; /* Darker text for headings */
+    }
+
+    h5 {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .contact-info {
+      color: #333; /* Darker gray for contact info */
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Footer Section */
+  .footer-section {
+    background-color: #f1f1f1; /* Light gray background */
+    padding: 40px 0;
+    margin-top: 40px;
+    text-align: center;
+    color: #333; /* Dark gray for footer text */
+
+    h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #007bff; /* Blue for footer heading */
+    }
+
+    p {
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Mobile Responsiveness */
+  @media (max-width: 768px) {
+    .stat-box {
+      margin-bottom: 20px;
+      padding: 20px; /* Slightly smaller padding for mobile */
+    }
+
+    h2, h3, h4, h5 {
+      font-size: 1.5rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+
+    .contact-info {
+      font-size: 1rem;
+    }
+  }
+
+  /* Responsive Mobile Styling */
+  @media (max-width: 480px) {
+    .stat-number {
+      font-size: 2.5rem; /* Smaller font size for mobile */
+    }
+
+    .stat-label {
+      font-size: 1rem; /* Adjust label font size */
+    }
+
+    h4, h5 {
+      font-size: 1.2rem;
+    }
+
+    p {
+      font-size: 0.9rem; /* Slightly smaller text on very small screens */
+    }
+  }
+}

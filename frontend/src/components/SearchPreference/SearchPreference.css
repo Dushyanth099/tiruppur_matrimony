@@ -1,0 +1,51 @@
+/* Search Preference Page Styles */
+.search-form {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.search-form .form-control {
+  font-size: 1rem;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  transition: border-color 0.3s ease;
+}
+
+.search-form .form-control:focus {
+  border-color: #007bff;
+}
+
+.search-form button {
+  background-color: #007bff;
+  border: none;
+  font-size: 1.1rem;
+  padding: 12px;
+  border-radius: 5px;
+}
+
+.search-form button:hover {
+  background-color: #0056b3;
+  transition: background-color 0.3s ease;
+}
+
+.container-fluid .navbar {
+  padding: 10px 20px;
+}
+
+.container-fluid .navbar .nav-link {
+  font-size: 1.2rem;
+  color: #343a40;
+}
+
+.container-fluid .navbar .nav-link:hover {
+  color: #0056b3;
+}
+
+h3 {
+  font-size: 2rem;
+  color: #333;
+}
+

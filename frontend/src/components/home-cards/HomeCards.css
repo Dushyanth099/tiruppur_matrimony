@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap');
+
+.cards-container {
+  width: 100%;
+  font-family: 'Open Sans', sans-serif;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 20px; /* Add gap between cards for spacing */
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    justify-content: center; /* Center align on smaller screens */
+  }
+
+  .cards {
+    width: 22%; /* Default card width */
+    background-color: #fff; /* White background for cards */
+    border-radius: 12px; /* Rounded corners */
+    padding: 30px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    text-align: center;
+    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    /* Card hover effect */
+    &:hover {
+      box-shadow: rgba(0, 0, 0, 0.2) 0px 6px 20px;
+      transform: translateY(-5px);
+    }
+
+    /* Card Title */
+    h3 {
+      color: #007bff; /* Blue color for the title */
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+
+    /* Card Text */
+    p {
+      color: rgba(85, 85, 85, 0.7);
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    /* Icon Style */
+    .cards-icon {
+      background-color: #f0f8ff; /* Light blue background for icons */
+      padding: 20px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 60px;
+      height: 60px;
+      color: #007bff; /* Icon color */
+      font-size: 2rem;
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 8px;
+    }
+
+    /* Responsive Card Width */
+    @media (max-width: 992px) {
+      width: 45%; /* Adjust to 45% on medium screens */
+    }
+
+    @media (max-width: 576px) {
+      width: 100%; /* Full width on small screens */
+      padding: 20px; /* Reduce padding on small screens */
+    }
+  }
+}

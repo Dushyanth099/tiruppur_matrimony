@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap');
+
+.Home-container {
+  font-family: 'Open Sans', sans-serif;
+  color: #333;
+  width: 100%;
+  min-height: calc(100vh - 50px); /* Adjust based on your footer height */
+  overflow: hidden; /* Ensure no overflow from animations */
+  position: relative; /* Allow absolute positioning for content */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensure content layout */
+
+  /* Background Image Styling */
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: 70%; /* Image height */
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%; /* Ensure the image covers the entire container */
+      object-fit: cover; /* Ensure the image covers the container proportionally */
+      animation: zoomIn 10s ease-in-out infinite alternate; /* Image zoom-in animation */
+    }
+
+    /* Apply background blur effect */
+    .overlay-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); /* Center the content */
+      color: white; /* Text color */
+      text-align: center;
+      font-size: 2rem;
+      font-family: 'Ubuntu', sans-serif; /* Optional font */
+      font-weight: bold;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Optional text shadow */
+      z-index: 1; /* Ensure the text is above the image */
+      max-width: 80%; /* Prevents text from stretching too wide */
+      padding: 10px; /* Add padding around text */
+      backdrop-filter: blur(5px); /* Adds the blur effect to the background */
+      -webkit-backdrop-filter: blur(5px); /* Safari fix */
+      background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent black background */
+      border-radius: 8px; /* Optional: rounds the edges of the text box */
+    }
+  }
+
+  /* Keyframes for zoom-in effect */
+  @keyframes zoomIn {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Register Section */
+  .container {
+    margin-top: 30px;
+  }
+
+  /* Information Section */
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+    font-size: 1.1rem;
+
+    li {
+      margin-bottom: 10px;
+      &:before {
+        content: "✔";
+        color: #007bff;
+        margin-right: 10px;
+      }
+    }
+  }
+
+  /* Responsive Design Adjustments */
+  @media (max-width: 992px) {
+    .image-container {
+      height: 300px; /* Smaller height for medium screens */
+    }
+
+    .overlay-content h1 {
+      font-size: 2rem;
+    }
+
+    .overlay-content p {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .image-container {
+      height: 250px; /* Smaller height for small screens */
+    }
+
+    .overlay-content h1 {
+      font-size: 1.8rem;
+    }
+
+    .overlay-content p {
+      font-size: 0.9rem;
+    }
+
+    .container {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+
+    .col-12.col-md-6 {
+      text-align: center;
+    }
+  }
+
+  /* Text Container Section */
+  .text-container {
+    background-color: grey;
+  }
+}
