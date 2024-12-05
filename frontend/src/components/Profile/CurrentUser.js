@@ -60,6 +60,16 @@ const CurrentUser = () => {
           {userDetails ? (
             <div className="row">
               <div className="col-md-6 mb-3">
+                {userDetails.photo && (
+                  <img
+                    src={`http://localhost:5000/${userDetails.photo.replace(
+                      /\\/g,
+                      "/"
+                    )}`}
+                    alt=""
+                    style={{ height: "200px", objectFit: "cover" }}
+                  />
+                )}
                 <p>
                   <strong>Name:</strong> {userDetails.name}
                 </p>
