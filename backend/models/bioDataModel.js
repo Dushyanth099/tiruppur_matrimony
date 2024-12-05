@@ -8,6 +8,7 @@ const bioDataSchema = new mongoose.Schema(
       required: true,
     },
     name: String,
+    gender: { type: String, enum: ["Male", "Female"], required: true },
     birthDate: Date,
     religion: String,
     motherTongue: String,

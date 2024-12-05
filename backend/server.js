@@ -3,33 +3,31 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const authRoutes = require("./routes/auth");
-const app = express();
 const path = require("path");
-// Middleware
+const http = require("http");
+
+const app = express();
+const server = http.createServer(app); // Create server using HTTP
+const port = process.env.PORT || 5000;
+
+// Middleware setup
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000", // Frontend URL
-    methods: ["GET", "POST"],
+    origin: "http://localhost:3000", // Frontend URL (React app)
+    methods: ["GET", "POST","PUT"],
   })
 );
+
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve static files
 
-//image routes
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// MongoDB connection
+// MongoDB connection setup
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => {
-    console.log("Error connecting to MongoDB:", err);
-  });
+  .catch((err) => console.log("Error connecting to MongoDB:", err));
 
 // Start the server
-const port = process.env.PORT || 5000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+server.listen(port, () => console.log(`Server running on port ${port}`));

@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const BioData = require("../models/bioDataModel");
+const Interest = require("../models/InterestSchema");
 const { upload, storage } = require("../utils/upload");
 
 exports.register = async (req, res) => {
@@ -44,13 +45,14 @@ exports.register = async (req, res) => {
 
 // biodata post
 exports.biodata = async (req, res) => {
- if (!req.user || !req.user.userId) {
-   return res.status(403).json({ message: "User authentication failed." });
+  if (!req.user || !req.user.userId) {
+    return res.status(403).json({ message: "User authentication failed." });
   }
   const userId = req.user.userId;
   try {
     const {
       name,
+      gender,
       birthDate,
       religion,
       motherTongue,
@@ -79,6 +81,7 @@ exports.biodata = async (req, res) => {
     const bioData = new BioData({
       userId,
       name,
+      gender,
       birthDate,
       religion,
       motherTongue,
@@ -117,9 +120,8 @@ exports.biodata = async (req, res) => {
 exports.authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Extract the token
-console.log("Authorization header:", authHeader);
-console.log("Extracted token:", token);
-
+  console.log("Authorization header:", authHeader);
+  console.log("Extracted token:", token);
 
   if (!token) {
     return res
@@ -130,10 +132,10 @@ console.log("Extracted token:", token);
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
     req.user = decoded; // Attach user information to the request object
-  console.log("Decoded token:", decoded);
+    console.log("Decoded token:", decoded);
     next(); // Proceed to the next middleware
   } catch (error) {
-     console.error("Token validation error:", error.message);
+    console.error("Token validation error:", error.message);
     res.status(403).json({ message: "Invalid or expired token" });
   }
 };
@@ -171,14 +173,301 @@ exports.login = async (req, res) => {
 // getallbiodatas
 exports.getAllBiodata = async (req, res) => {
   try {
-    // Fetch all biodata entries, populate the user details if needed
-    const biodatas = await BioData.find().populate("userId", "userEmail name"); // You can customize this based on your needs
+    // Ensure the user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(403).json({ message: "User authentication failed." });
+    }
+
+    // Fetch the authenticated user's gender from their biodata
+    const userBiodata = await BioData.findOne({ userId: req.user.userId });
+
+    if (!userBiodata || !userBiodata.gender) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+
+    const oppositeGender = userBiodata.gender === "Male" ? "Female" : "Male";
+
+    // Fetch biodata entries for the opposite gender
+    const biodatas = await BioData.find({ gender: oppositeGender }).populate(
+      "userId",
+      "userEmail name"
+    );
 
     if (!biodatas || biodatas.length === 0) {
-      return res.status(404).json({ message: "No biodata available" });
+      return res.status(404).json({ message: "No biodata available." });
     }
 
     res.status(200).json(biodatas);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Fetch Current User's Details
+exports.getCurrentUserDetails = async (req, res) => {
+  try {
+    const userBiodata = await BioData.findOne({ userId: req.user.userId });
+    if (!userBiodata) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+    res.status(200).json(userBiodata);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// Update Current User's Details
+exports.updateCurrentUserDetails = async (req, res) => {
+  try {
+    const updates = req.body;
+    const photoPath = req.file ? req.file.path : null;
+
+    const updatedBiodata = await BioData.findOneAndUpdate(
+      { userId: req.user.userId },
+      { ...updates, photo: photoPath || updates.photo },
+      { new: true }
+    );
+
+    if (!updatedBiodata) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Biodata updated successfully!", updatedBiodata });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+exports.searchBiodata = async (req, res) => {
+  try {
+    // Ensure the user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(403).json({ message: "User authentication failed." });
+    }
+
+    // Fetch the authenticated user's biodata to determine opposite gender
+    const userBiodata = await BioData.findOne({ userId: req.user.userId });
+
+    if (!userBiodata || !userBiodata.gender) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+
+    const oppositeGender = userBiodata.gender === "Male" ? "Female" : "Male";
+
+    // Extract filter criteria from request body
+    const {
+      name,
+      religion,
+      caste,
+      subCaste,
+      city,
+      state,
+      occupation,
+      ageMin,
+      ageMax,
+      motherTongue,
+      gothram,
+      dosham,
+      maritalStatus,
+      height,
+      familyStatus,
+      familyType,
+      familyValues,
+      disability,
+      highestEducation,
+      employedIn,
+      annualIncomeMin,
+      annualIncomeMax,
+      workLocation,
+    } = req.body;
+
+    // Construct dynamic query
+    const query = { gender: oppositeGender };
+
+    if (name) query.name = { $regex: name, $options: "i" };
+    if (religion) query.religion = { $regex: religion, $options: "i" };
+    if (caste) query.caste = { $regex: caste, $options: "i" };
+    if (subCaste) query.subCaste = { $regex: subCaste, $options: "i" };
+    if (motherTongue)
+      query.motherTongue = { $regex: motherTongue, $options: "i" };
+    if (gothram) query.gothram = { $regex: gothram, $options: "i" };
+    if (dosham) query.dosham = { $regex: dosham, $options: "i" };
+    if (maritalStatus)
+      query.maritalStatus = { $regex: maritalStatus, $options: "i" };
+    if (height) query.height = height; // Adjust as needed
+    if (familyStatus)
+      query.familyStatus = { $regex: familyStatus, $options: "i" };
+    if (familyType) query.familyType = { $regex: familyType, $options: "i" };
+    if (familyValues)
+      query.familyValues = { $regex: familyValues, $options: "i" };
+    if (disability) query.disability = { $regex: disability, $options: "i" };
+    if (highestEducation)
+      query.highestEducation = { $regex: highestEducation, $options: "i" };
+    if (employedIn) query.employedIn = { $regex: employedIn, $options: "i" };
+    if (occupation) query.occupation = { $regex: occupation, $options: "i" };
+    if (workLocation)
+      query.workLocation = { $regex: workLocation, $options: "i" };
+    if (city) query.city = { $regex: city, $options: "i" };
+    if (state) query.state = { $regex: state, $options: "i" };
+
+    // Handle age filtering based on birth date
+    if (ageMin || ageMax) {
+      const currentDate = new Date();
+      const birthDateQuery = {};
+
+      if (ageMin) {
+        const maxBirthDate = new Date(
+          currentDate.getFullYear() - ageMin,
+          currentDate.getMonth(),
+          currentDate.getDate()
+        );
+        birthDateQuery.$lte = maxBirthDate;
+      }
+
+      if (ageMax) {
+        const minBirthDate = new Date(
+          currentDate.getFullYear() - ageMax,
+          currentDate.getMonth(),
+          currentDate.getDate()
+        );
+        birthDateQuery.$gte = minBirthDate;
+      }
+
+      query.birthDate = birthDateQuery;
+    }
+
+    // Fetch filtered biodata from database
+    const filteredBiodata = await BioData.find(query).populate(
+      "userId",
+      "userEmail name "
+    );
+
+    if (!filteredBiodata || filteredBiodata.length === 0) {
+      return res.status(404).json({ message: "No matching biodata found." });
+    }
+
+    res.status(200).json(filteredBiodata);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// Search by caste and sub-caste
+exports.searchCasteSubCaste = async (req, res) => {
+  try {
+    const { caste, subCaste } = req.body;
+
+    // Ensure the user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(403).json({ message: "User authentication failed." });
+    }
+
+    // Fetch the authenticated user's biodata to determine opposite gender
+    const userBiodata = await BioData.findOne({ userId: req.user.userId });
+
+    if (!userBiodata || !userBiodata.gender) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+
+    const oppositeGender = userBiodata.gender === "Male" ? "Female" : "Male";
+
+    // Construct dynamic query
+    const query = { gender: oppositeGender };
+
+    if (caste) query.caste = { $regex: caste, $options: "i" };
+    if (subCaste) query.subCaste = { $regex: subCaste, $options: "i" };
+
+    const filteredBiodata = await BioData.find(query).populate(
+      "userId",
+      "userEmail name"
+    );
+
+    if (!filteredBiodata || filteredBiodata.length === 0) {
+      return res.status(404).json({ message: "No matching biodata found." });
+    }
+
+    res.status(200).json(filteredBiodata);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Search by location (city, state)
+exports.searchLocation = async (req, res) => {
+  try {
+    const { city, state } = req.body;
+
+    // Ensure the user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(403).json({ message: "User authentication failed." });
+    }
+
+    // Fetch the authenticated user's biodata to determine opposite gender
+    const userBiodata = await BioData.findOne({ userId: req.user.userId });
+
+    if (!userBiodata || !userBiodata.gender) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+
+    const oppositeGender = userBiodata.gender === "Male" ? "Female" : "Male";
+
+    const query = { gender: oppositeGender };
+
+    if (city) query.city = { $regex: city, $options: "i" };
+    if (state) query.state = { $regex: state, $options: "i" };
+
+    const filteredBiodata = await BioData.find(query).populate(
+      "userId",
+      "userEmail name"
+    );
+
+    if (!filteredBiodata || filteredBiodata.length === 0) {
+      return res.status(404).json({ message: "No matching biodata found." });
+    }
+
+    res.status(200).json(filteredBiodata);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Search by profession (occupation, employedIn)
+exports.searchProfession = async (req, res) => {
+  try {
+    const { occupation, employedIn } = req.body;
+
+    // Ensure the user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(403).json({ message: "User authentication failed." });
+    }
+
+    // Fetch the authenticated user's biodata to determine opposite gender
+    const userBiodata = await BioData.findOne({ userId: req.user.userId });
+
+    if (!userBiodata || !userBiodata.gender) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+
+    const oppositeGender = userBiodata.gender === "Male" ? "Female" : "Male";
+
+    const query = { gender: oppositeGender };
+
+    if (occupation) query.occupation = { $regex: occupation, $options: "i" };
+    if (employedIn) query.employedIn = { $regex: employedIn, $options: "i" };
+
+    const filteredBiodata = await BioData.find(query).populate(
+      "userId",
+      "userEmail name"
+    );
+
+    if (!filteredBiodata || filteredBiodata.length === 0) {
+      return res.status(404).json({ message: "No matching biodata found." });
+    }
+
+    res.status(200).json(filteredBiodata);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
