@@ -9,8 +9,9 @@ const {
   searchBiodata,
   searchCasteSubCaste,
   searchLocation,
-  searchProfession,
+  searchProfession,sendInterest,handleInterestResponse,
 } = require("../controllers/authController");
+
 const { authenticateToken } = require("../controllers/authController");
 const { upload } = require("../utils/upload");
 const router = express.Router();
@@ -27,7 +28,9 @@ router.put(
   updateCurrentUserDetails
 );
 router.post("/biodata/search", authenticateToken, searchBiodata);
-router.post("/search/casteSubCaste", authenticateToken,searchCasteSubCaste);
-router.post("/search/location", authenticateToken,searchLocation);
-router.post("/search/profession", authenticateToken,searchProfession);
+router.post("/search/casteSubCaste", authenticateToken, searchCasteSubCaste);
+router.post("/search/location", authenticateToken, searchLocation);
+router.post("/search/profession", authenticateToken, searchProfession);
+router.post("/send-interest", authenticateToken, sendInterest);
+router.post("/handle-interest", authenticateToken, handleInterestResponse);
 module.exports = router;

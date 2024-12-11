@@ -4,6 +4,7 @@ const User = require("../models/User");
 const BioData = require("../models/bioDataModel");
 const Interest = require("../models/InterestSchema");
 const { upload, storage } = require("../utils/upload");
+const { io } = require("../server");
 
 exports.register = async (req, res) => {
   const { userEmail, userPassword } = req.body;
@@ -471,5 +472,76 @@ exports.searchProfession = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.sendInterest = async (req, res) => {
+  const { recipientId } = req.body;
+  const senderId = req.user?.userId;
+  const io = req.io;
+  const userSockets = req.userSockets;
+
+  if (!senderId) {
+    console.error("Sender ID is missing. Ensure the user is authenticated.");
+    return res
+      .status(401)
+      .json({ message: "Unauthorized. Sender ID missing." });
+  }
+  const recipient = await User.findById(recipientId);
+  if (!recipientId) {
+    return res.status(400).json({ message: "Recipient ID is required." });
+  }
+
+  console.log("Sender ID:", senderId);
+  console.log("Recipient ID:", recipientId);
+  try {
+    const interest = new Interest({ senderId, recipientId, status: "Pending" });
+    await interest.save();
+
+    if (userSockets && userSockets[recipientId]) {
+      io.to(userSockets[recipientId]).emit("new-interest", {
+        message: `You have a new interest from user ${senderId}.`,
+      });
+      console.log(`Notification sent to recipient ${recipientId}`);
+    } else {
+      console.log(`Recipient ${recipientId} is not connected.`);
+    }
+
+    res.status(201).json({ message: "Interest sent successfully!", interest });
+  } catch (error) {
+    console.error("Error in sendInterest:", error.message);
+    res.status(500).json({ message: "Failed to send interest." });
+  }
+};
+exports.handleInterestResponse = async (req, res) => {
+  const { interestId, action } = req.body; // "Accept" or "Reject"
+  const userId = req.user.userId;
+  const io = req.io;
+  const userSockets = req.userSockets;
+
+  try {
+    const interest = await Interest.findById(interestId);
+
+    if (!interest) {
+      return res.status(404).json({ message: "Interest not found." });
+    }
+
+    if (interest.recipientId.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized action." });
+    }
+
+    interest.status = action === "Accept" ? "Accepted" : "Rejected";
+    await interest.save();
+
+    if (userSockets[interest.senderId]) {
+      io.to(userSockets[interest.senderId]).emit("interest-response", {
+        message: `${req.user.userEmail} has ${interest.status} your interest.`,
+      });
+    }
+
+    res.status(200).json({ message: `Interest ${interest.status}.`, interest });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to update interest status." });
   }
 };

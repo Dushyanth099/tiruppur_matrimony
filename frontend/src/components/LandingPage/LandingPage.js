@@ -49,7 +49,7 @@ const LandingPage = () => {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/LandingPage">
+              <a className="nav-link" href="/notifications">
                 Notification
               </a>
             </li>

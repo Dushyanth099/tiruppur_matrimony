@@ -72,7 +72,7 @@ const CurrentUser = () => {
       </nav>
       <div className="container mt-4">
         <div className="card shadow">
-          <div className="card-header text-center bg-primary text-white">
+          <div className="card-header text-center bg-warning text-white">
             <h2>Hi, {userDetails?.name}</h2>
           </div>
           <div className="card-body">

@@ -12,27 +12,17 @@ import Search from "./components/Search/Search";
 import SearchPreferencePage from "./components/SearchPreference/SearchPreference";
 import SearchResultsPage from "./components/SearchPreference/SearchResultsPage";
 import Profilecards from "./components/Profilecards/Profilecards";
+import Notifications from "./components/Interest/Notifications";
+
 function App() {
   return (
     <div className="App">
       <Routes>
-        {/* Route for Home page */}
         <Route path="/" element={<Home />} />
-
-        {/* Route for Home page */}
         <Route path="/Home" element={<Home />} />
-
-        {/* Route for Login page */}
         <Route path="/login" element={<Login />} />
-
-        {/* Route for Register page */}
-
         <Route path="/register" element={<Register />} />
-        {/* Route for Register page */}
-
         <Route path="/BioData" element={<BioData />} />
-
-        {/* LandingPage */}
         <Route path="/ProfileCards" element={<Profilecards />} />
         <Route path="/LandingPage" element={<LandingPage />} />
         <Route path="/current-user" element={<CurrentUser />} />
@@ -43,6 +33,9 @@ function App() {
           element={<SearchPreferencePage />}
         />
         <Route path="/search-results" element={<SearchResultsPage />} />
+    
+        <Route path="/notifications" element={<Notifications />} />
+    
       </Routes>
     </div>
   );

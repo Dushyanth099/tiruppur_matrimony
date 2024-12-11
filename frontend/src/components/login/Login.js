@@ -75,6 +75,7 @@ const Login = () => {
                 placeholder="Enter your email"
                 value={values.userEmail}
                 name="userEmail"
+                autoComplete="username"
                 onChange={handleInputValues}
                 required
               />
@@ -91,6 +92,7 @@ const Login = () => {
                 placeholder="Enter your password"
                 value={values.userPassword}
                 name="userPassword"
+                autoComplete="current-password"
                 onChange={handleInputValues}
                 required
               />
