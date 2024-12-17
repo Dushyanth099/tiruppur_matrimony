@@ -12,8 +12,7 @@ import Search from "./components/Search/Search";
 import SearchPreferencePage from "./components/SearchPreference/SearchPreference";
 import SearchResultsPage from "./components/SearchPreference/SearchResultsPage";
 import Profilecards from "./components/Profilecards/Profilecards";
-import Notifications from "./components/Interest/Notifications";
-
+import Notifications from "./components/Interest/Notification";
 function App() {
   return (
     <div className="App">
@@ -33,9 +32,7 @@ function App() {
           element={<SearchPreferencePage />}
         />
         <Route path="/search-results" element={<SearchResultsPage />} />
-    
         <Route path="/notifications" element={<Notifications />} />
-    
       </Routes>
     </div>
   );

@@ -2,9 +2,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const BioData = require("../models/bioDataModel");
-const Interest = require("../models/InterestSchema");
 const { upload, storage } = require("../utils/upload");
-const { io } = require("../server");
+const Interest = require("../models/InterestSchema");
+const Notification = require("../models/NotificationSchema");
+const { ObjectId } = require("mongodb");
 
 exports.register = async (req, res) => {
   const { userEmail, userPassword } = req.body;
@@ -476,72 +477,189 @@ exports.searchProfession = async (req, res) => {
 };
 
 exports.sendInterest = async (req, res) => {
-  const { recipientId } = req.body;
-  const senderId = req.user?.userId;
-  const io = req.io;
-  const userSockets = req.userSockets;
-
-  if (!senderId) {
-    console.error("Sender ID is missing. Ensure the user is authenticated.");
-    return res
-      .status(401)
-      .json({ message: "Unauthorized. Sender ID missing." });
-  }
-  const recipient = await User.findById(recipientId);
-  if (!recipientId) {
-    return res.status(400).json({ message: "Recipient ID is required." });
-  }
-
-  console.log("Sender ID:", senderId);
-  console.log("Recipient ID:", recipientId);
   try {
-    const interest = new Interest({ senderId, recipientId, status: "Pending" });
-    await interest.save();
+    console.log("Request headers:", req.headers);
+    console.log("Request body:", req.body);
+    const senderId = req.user?.userId; // Get sender ID from logged-in user context
+    const { receiverId } = req.body; // Get receiver ID from request body
+    console.log("Decoded token (req.user):", req.user);
 
-    if (userSockets && userSockets[recipientId]) {
-      io.to(userSockets[recipientId]).emit("new-interest", {
-        message: `You have a new interest from user ${senderId}.`,
-      });
-      console.log(`Notification sent to recipient ${recipientId}`);
-    } else {
-      console.log(`Recipient ${recipientId} is not connected.`);
+    if (!senderId || !receiverId) {
+      return res
+        .status(400)
+        .json({ message: "Sender and receiver IDs are required" });
+    }
+    console.log("receiverId type:", typeof receiverId);
+    console.log("Sender ID:", senderId);
+    console.log("receiverId value:", receiverId);
+
+    // Validate receiverId format
+    if (!ObjectId.isValid(receiverId)) {
+      console.error("Invalid receiver ID format:", receiverId);
+      return res.status(400).json({ message: "Invalid receiver ID format." });
     }
 
-    res.status(201).json({ message: "Interest sent successfully!", interest });
+    console.log("Searching for receiver with ID:", receiverId);
+
+    const receiver = await User.findOne({ biodata: new ObjectId(receiverId) });
+    console.log("Receiver found:", receiver);
+
+    if (!receiver) {
+      console.error("Receiver not found for ID:", receiverId);
+      return res.status(404).json({ message: "Receiver not found." });
+    }
+
+    // Check if interest already exists
+    const existingInterest = await Interest.findOne({
+      sender: senderId,
+      receiver: receiver.biodata, // Use receiver's biodata field
+    });
+
+    if (existingInterest) {
+      return res
+        .status(400)
+        .json({ message: "Interest has already been sent to this user." });
+    }
+
+    // Create a new interest
+    const interest = new Interest({
+      sender: senderId,
+      receiver: receiver.biodata, // Link to biodata field
+    });
+    await interest.save();
+
+    res.status(200).json({ message: "Interest sent successfully." });
   } catch (error) {
-    console.error("Error in sendInterest:", error.message);
-    res.status(500).json({ message: "Failed to send interest." });
+    console.error("Error sending interest:", error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };
-exports.handleInterestResponse = async (req, res) => {
-  const { interestId, action } = req.body; // "Accept" or "Reject"
-  const userId = req.user.userId;
-  const io = req.io;
-  const userSockets = req.userSockets;
-
+exports.respondInterest = async (req, res) => {
   try {
-    const interest = await Interest.findById(interestId);
+    const userId = req.user?.userId; // Extract current user's ID from token
+    const { interestId, response } = req.body; // Extract interest ID and response
 
+    if (!interestId || !response) {
+      return res
+        .status(400)
+        .json({ message: "Interest ID and response are required." });
+    }
+
+    // Validate response type
+    if (!["accepted", "rejected"].includes(response)) {
+      return res.status(400).json({ message: "Invalid response type." });
+    }
+
+    // Fetch the user's biodata ID to match the Interest's receiver
+    const user = await User.findById(userId).select("biodata");
+    if (!user || !user.biodata) {
+      return res
+        .status(404)
+        .json({ message: "User biodata not found for authorization." });
+    }
+
+    const userBiodataId = user.biodata;
+
+    // Find the interest document
+    const interest = await Interest.findById(interestId);
     if (!interest) {
       return res.status(404).json({ message: "Interest not found." });
     }
 
-    if (interest.recipientId.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized action." });
-    }
-
-    interest.status = action === "Accept" ? "Accepted" : "Rejected";
-    await interest.save();
-
-    if (userSockets[interest.senderId]) {
-      io.to(userSockets[interest.senderId]).emit("interest-response", {
-        message: `${req.user.userEmail} has ${interest.status} your interest.`,
+    // Authorization: Ensure the logged-in user is the receiver
+    if (interest.receiver.toString() !== userBiodataId.toString()) {
+      return res.status(403).json({
+        message: "You are not authorized to respond to this interest.",
       });
     }
 
-    res.status(200).json({ message: `Interest ${interest.status}.`, interest });
+    // Update the interest status
+    interest.status = response;
+    await interest.save();
+
+    // Notify the sender
+    const sender = await User.findById(interest.sender);
+    if (!sender) {
+      return res.status(404).json({ message: "Sender not found." });
+    }
+    // Create a notification for the sender
+    const notification = new Notification({
+      sender: userId, // Receiver is responding
+      receiver: sender._id, // Sender gets the notification
+      message: `Your interest has been ${response} by the user.`,
+      status: response, // Accepted or rejected
+      interest: interestId, // Link to the interest
+    });
+
+    await notification.save();
+
+    res.status(200).json({ message: `Interest ${response} successfully.` });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to update interest status." });
+    console.error("Error responding to interest:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+exports.notifications = async (req, res) => {
+  try {
+    const userId = req.user?.userId; // Extract the logged-in user's ID from the token
+
+    if (!userId) {
+      return res.status(403).json({ message: "User authentication failed." });
+    }
+
+    // Fetch the logged-in user's biodata ID
+    const user = await User.findById(userId).select("biodata");
+    if (!user || !user.biodata) {
+      return res.status(404).json({ message: "User biodata not found." });
+    }
+    const receiverBiodataId = user.biodata;
+
+    console.log("Logged-in user ID:", userId);
+    console.log("Logged-in user's biodata ID:", receiverBiodataId);
+
+    // Fetch interests where the user is the receiver
+    const receivedNotifications = await Interest.find({
+      receiver: receiverBiodataId,
+    })
+      .populate("sender", "userEmail") // Populate sender details (userEmail only)
+      .sort({ createdAt: -1 }); // Sort notifications by most recent
+    console.log("Fetched notifications:", receivedNotifications);
+
+    // Fetch notifications where the user is the sender (i.e., response to their interest)
+    const sentNotifications = await Notification.find({ receiver: userId }) // receiver is sender's ID in this case
+      .populate("sender", "userEmail") // Populate the responding user details
+      .sort({ createdAt: -1 });
+
+    console.log("Received notifications:", receivedNotifications);
+    console.log("Sent notifications:", sentNotifications);
+    // Combine both received and sent notifications
+    const notifications = [
+      ...receivedNotifications.map((interest) => ({
+        _id: interest._id,
+        type: "interest",
+        sender: interest.sender,
+        status: interest.status,
+        createdAt: interest.createdAt,
+      })),
+      ...sentNotifications.map((notif) => ({
+        _id: notif._id,
+        type: "response",
+        sender: notif.sender,
+        message: notif.message,
+        status: notif.status,
+        createdAt: notif.createdAt,
+      })),
+    ];
+
+    // Sort combined notifications by creation time (descending)
+    notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    console.log("Combined notifications:", notifications);
+
+    // Return notifications or an empty array
+    res.status(200).json({ notifications });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };

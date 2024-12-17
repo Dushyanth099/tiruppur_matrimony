@@ -2,10 +2,7 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profilecards.css";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import socket from "../Interest/Socket";
-import SendInterest from "../Interest/SendInterest";
-
+import SendInterestButton from "../Interest/InterestSent";
 const Profilecards = ({ showNavbar = true }) => {
   const [biodata, setBiodata] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,45 +38,6 @@ const Profilecards = ({ showNavbar = true }) => {
     fetchBiodata();
   }, []);
 
-  const handleInterest = async (recipientId) => {
-    console.log("Recipient ID:", recipientId); // Debugging log
-    if (!recipientId) {
-      alert("Recipient ID is invalid");
-      return;
-    }
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Token not found. Please log in again.");
-        return;
-      }
-      try {
-        await SendInterest(recipientId); // Use the helper function
-      } catch (error) {
-        console.error("Error in handleInterest:", error.message);
-      }
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/send-interest",
-        { recipientId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert(response.data.message);
-      socket.emit("send-interest", {
-        senderId: localStorage.getItem("userId"),
-        recipientId,
-      });
-    } catch (error) {
-      console.error(
-        "Error in sending interest:",
-        error.response?.data || error.message
-      );
-      alert(
-        `Failed to send interest: ${
-          error.response?.data?.message || error.message
-        }`
-      );
-    }
-  };
   const renderProfileCard = (userData, index) => (
     <div className="col-lg-4 col-md-6 col-sm-12 mb-4" key={index}>
       <div className="card shadow-sm profile-card h-100">
@@ -110,7 +68,6 @@ const Profilecards = ({ showNavbar = true }) => {
               <span>No photo</span>
             </div>
           )}
-
           {/* Basic Info */}
           <h5 className="card-title text-primary">{userData.name}</h5>
           <p className="card-text">
@@ -120,14 +77,7 @@ const Profilecards = ({ showNavbar = true }) => {
             <strong>Location:</strong> {userData.city || "N/A"}
           </p>
           {/* Add Interest Button */}
-          <button
-            className="btn btn-outline-warning mb-3 mt-3"
-            onClick={() => handleInterest(userData._id)} // Send interest on button click>
-          >
-            {" "}
-            <i className="fas fa-heart me-2"></i>
-            Add Interest
-          </button>
+          <SendInterestButton receiverId={userData._id} />
           {/* Detailed Info with Toggle */}
           {expandedIndex === index ? (
             <>

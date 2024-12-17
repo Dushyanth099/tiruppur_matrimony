@@ -9,7 +9,10 @@ const {
   searchBiodata,
   searchCasteSubCaste,
   searchLocation,
-  searchProfession,sendInterest,handleInterestResponse,
+  searchProfession,
+  sendInterest,
+  notifications,
+  respondInterest,
 } = require("../controllers/authController");
 
 const { authenticateToken } = require("../controllers/authController");
@@ -32,5 +35,7 @@ router.post("/search/casteSubCaste", authenticateToken, searchCasteSubCaste);
 router.post("/search/location", authenticateToken, searchLocation);
 router.post("/search/profession", authenticateToken, searchProfession);
 router.post("/send-interest", authenticateToken, sendInterest);
-router.post("/handle-interest", authenticateToken, handleInterestResponse);
+router.post("/respond-interest", authenticateToken, respondInterest);
+router.get("/notifications/", authenticateToken, notifications);
+
 module.exports = router;
