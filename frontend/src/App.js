@@ -15,7 +15,7 @@ import Profilecards from "./components/Profilecards/Profilecards";
 import Notifications from "./components/Interest/Notification";
 import Recentposts from "./components/RecentPosts/Recent";
 import FavouriteNotification from "./components/Favorites/FavoNotifications";
-
+import Chat from "./components/Messages/Chat";
 function App() {
   return (
     <div className="App">
@@ -38,6 +38,7 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/recent" element={<Recentposts />} />
         <Route path="/favorites" element={<FavouriteNotification />} />
+        <Route path="/chat" element={<Chat />} />
       </Routes>
     </div>
   );

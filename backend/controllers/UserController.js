@@ -2,7 +2,7 @@ const BioData = require("../models/bioDataModel");
 const Favorite = require("../models/FavoriteSchema");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-
+const Message = require("../models/MessageSchema");
 exports.recentProfiles = async (req, res) => {
   try {
     console.log("Fetching recent profiles for user:", req.user);
@@ -131,5 +131,40 @@ exports.removeFavorites = async (req, res) => {
   } catch (err) {
     console.error("Error removing from favorites:", err);
     res.status(500).json({ message: "Internal server error." });
+  }
+};
+exports.sendMessage = async (req, res) => {
+  const { user1Id, user2Id } = req.params;
+
+  try {
+    const messages = await Message.find({
+      $or: [
+        { senderId: user1Id, receiverId: user2Id }, // Ensure fields match
+        { senderId: user2Id, receiverId: user1Id }, // Ensure fields match
+      ],
+    }).sort({ createdAt: 1 });
+
+    res.status(200).json(messages);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching chat history" });
+  }
+};
+
+exports.receiveMessage = async (req, res) => {
+  const { senderId, receiverId, content } = req.body; // Ensure correct field names
+
+  try {
+    const newMessage = new Message({
+      senderId, // Correct field name
+      receiverId, // Correct field name
+      content, // Correct field name
+    });
+
+    await newMessage.save();
+    res.status(201).json(newMessage);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error sending message" });
   }
 };

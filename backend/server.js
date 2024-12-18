@@ -9,8 +9,8 @@ const http = require("http");
 const app = express();
 const server = http.createServer(app); // Create server using HTTP
 const port = process.env.PORT || 5000;
-
-
+const Message = require("./models/MessageSchema");
+const { Server } = require("socket.io");
 // Middleware setup
 app.use(express.json());
 app.use(
@@ -26,6 +26,45 @@ app.use("/api/user", userRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve static files
 app.use(express.urlencoded({ extended: true }));
+
+// socket connection
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // React frontend URL
+    methods: ["GET", "POST"],
+  },
+});
+// Sockets
+io.on("connection", (socket) => {
+  console.log(`User connected: ${socket.id}`);
+
+  // Join a user's personal room (based on their ID)
+  socket.on("joinUser", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined their personal room.`);
+  });
+
+  // Handle sending messages
+  socket.on("sendMessage", async ({ sender, receiver, message }) => {
+    try {
+      // Save message to the database
+      const newMessage = new Message({ sender, receiver, message });
+      await newMessage.save();
+
+      // Emit message to the receiver's room
+      io.to(receiver).emit("receiveMessage", {
+        sender,
+        message,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error("Error saving message:", error);
+    }
+  });
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
 // MongoDB connection setup
 mongoose
   .connect(process.env.MONGODB_URI)

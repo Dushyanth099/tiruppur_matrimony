@@ -35,11 +35,6 @@ const LandingPage = () => {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/LandingPage">
-                Mailbox
-              </a>
-            </li>
-            <li className="nav-item">
               <a className="nav-link" href="/chat">
                 Chat
               </a>
