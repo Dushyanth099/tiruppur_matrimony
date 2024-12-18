@@ -13,6 +13,9 @@ import SearchPreferencePage from "./components/SearchPreference/SearchPreference
 import SearchResultsPage from "./components/SearchPreference/SearchResultsPage";
 import Profilecards from "./components/Profilecards/Profilecards";
 import Notifications from "./components/Interest/Notification";
+import Recentposts from "./components/RecentPosts/Recent";
+import FavouriteNotification from "./components/Favorites/FavoNotifications";
+
 function App() {
   return (
     <div className="App">
@@ -33,6 +36,8 @@ function App() {
         />
         <Route path="/search-results" element={<SearchResultsPage />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/recent" element={<Recentposts />} />
+        <Route path="/favorites" element={<FavouriteNotification />} />
       </Routes>
     </div>
   );

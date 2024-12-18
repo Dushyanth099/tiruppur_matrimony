@@ -14,7 +14,6 @@ const {
   notifications,
   respondInterest,
 } = require("../controllers/authController");
-
 const { authenticateToken } = require("../controllers/authController");
 const { upload } = require("../utils/upload");
 const router = express.Router();
@@ -37,5 +36,6 @@ router.post("/search/profession", authenticateToken, searchProfession);
 router.post("/send-interest", authenticateToken, sendInterest);
 router.post("/respond-interest", authenticateToken, respondInterest);
 router.get("/notifications/", authenticateToken, notifications);
+
 
 module.exports = router;

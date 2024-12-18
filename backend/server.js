@@ -3,11 +3,13 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/userRoutes");
 const path = require("path");
 const http = require("http");
 const app = express();
 const server = http.createServer(app); // Create server using HTTP
 const port = process.env.PORT || 5000;
+
 
 // Middleware setup
 app.use(express.json());
@@ -20,6 +22,8 @@ app.use(
 );
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve static files
 app.use(express.urlencoded({ extended: true }));
 // MongoDB connection setup

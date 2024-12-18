@@ -3,6 +3,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profilecards.css";
 import { useNavigate } from "react-router-dom";
 import SendInterestButton from "../Interest/InterestSent";
+import AddFavorite from "../Favorites/AddFavorites";
+
 const Profilecards = ({ showNavbar = true }) => {
   const [biodata, setBiodata] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,9 @@ const Profilecards = ({ showNavbar = true }) => {
           </p>
           {/* Add Interest Button */}
           <SendInterestButton receiverId={userData._id} />
+            {/* Favorite Icon */}
+          <AddFavorite userId={userData._id} /> {/* Use AddFavorite Component */}
+          
           {/* Detailed Info with Toggle */}
           {expandedIndex === index ? (
             <>

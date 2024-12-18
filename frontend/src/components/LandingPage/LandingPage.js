@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import "./LandingPage.css";
 import React from "react";
 import Profilecards from "../Profilecards/Profilecards";
+import Carosel from "../RecentPosts/Carosel";
 
 const LandingPage = () => {
   return (
@@ -39,7 +40,7 @@ const LandingPage = () => {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/LandingPage">
+              <a className="nav-link" href="/chat">
                 Chat
               </a>
             </li>
@@ -108,6 +109,21 @@ const LandingPage = () => {
                   </button>
                 </Link>
               </div>
+
+              <div className="mb-3">
+                <Link to="/Recent">
+                  <button className="btn btn-secondary w-100 mt-3">
+                    Recent posts
+                  </button>
+                </Link>
+              </div>
+              <div className="mb-3">
+                <Link to="/favorites">
+                  <button className="btn btn-secondary w-100 mt-3">
+                    Favourites
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -117,6 +133,23 @@ const LandingPage = () => {
           </div>
         </div>
       </div>
+      <div className="container-fluid ">
+        <h1 id="text-title">Recents Posts</h1>
+      </div>
+      <Carosel />
+      {/* Footer */}
+      <footer className="footer mt-5">
+        <div className="footer-content ms-auto mb-5">
+          <a
+            href="https://api.whatsapp.com/send?phone=8220406322"
+            className="whatsapp-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i className="fab fa-whatsapp"></i> WhatsApp
+          </a>
+        </div>
+      </footer>
     </>
   );
 };

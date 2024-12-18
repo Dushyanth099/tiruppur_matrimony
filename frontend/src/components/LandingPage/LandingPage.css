@@ -36,3 +36,33 @@
   color: #ff6600; /* Orange for active link */
   font-weight: bold; /* Make active link bold */
 }
+/* WhatsApp Link Styles */
+.whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #25d366; /* WhatsApp green color */
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: 2px solid #25d366;
+  border-radius: 25px;
+  padding: 10px 15px;
+  transition: all 0.3s ease-in-out;
+}
+
+.whatsapp-link i {
+  font-size: 1.8rem; /* Icon size */
+  margin-right: 8px; /* Space between icon and text */
+  transition: transform 0.3s ease-in-out;
+}
+
+.whatsapp-link:hover {
+  background-color: #25d366;
+  color: #fff; /* Text and icon turn white */
+  transform: translateY(-3px); /* Slight lift effect */
+}
+
+.whatsapp-link:hover i {
+  transform: rotate(15deg); /* Rotate icon slightly */
+}
