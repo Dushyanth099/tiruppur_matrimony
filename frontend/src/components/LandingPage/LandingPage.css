@@ -66,3 +66,11 @@
 .whatsapp-link:hover i {
   transform: rotate(15deg); /* Rotate icon slightly */
 }
+/* Add a border line to separate the "Current User" button */
+/* Add a highlighted border and space below the profile section */
+.profile-border {
+  margin-top: 20px; /* Adds space above the Profile button */
+  padding-top: 10px; /* Adds padding inside the border */
+  font-weight: bold; /* Make the button text bold */
+  color: white; /* Dark text for better contrast */
+}

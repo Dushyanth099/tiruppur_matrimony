@@ -5,12 +5,13 @@ import { io } from "socket.io-client";
 import { jwtDecode } from "jwt-decode"; // Correct import
 import axios from "axios";
 import "./Chat.css";
+import { useNavigate } from "react-router-dom";
 const Chat = () => {
   const { userId } = useParams(); // Receiver's userId
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   console.log("Receiver userId from URL:", userId); // Debug log
 
   // Decode JWT to get the current user's ID
@@ -91,34 +92,53 @@ const Chat = () => {
 
   // Render Chat Interface
   return (
-    <div className="chat-container">
-      <h3>Chat with User {userId}</h3>
-      <div className="message-box">
-        {messages.length > 0 ? (
-          messages.map((message, index) => (
-            <div
-              key={index}
-              className={`message ${
-                message.senderId === currentUserId ? "sent" : "received"
-              }`}
-            >
-              <p>{message.message}</p>
-              <span className="timestamp">
-                {new Date(message.createdAt).toLocaleTimeString()}
-              </span>
-            </div>
-          ))
-        ) : (
-          <p>No messages yet. Start the conversation!</p>
-        )}
+    <>
+      <nav className="navbar navbar-expand-lg navbar-light bg-warning">
+        <div className="container-fluid">
+          <a className="navbar-brand" href="/LandingPage">
+            Tiruppur Matrimony
+          </a>
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item">
+              <button
+                className="btn btn-dark mx-2"
+                onClick={() => navigate("/LandingPage")}
+              >
+                HomePage
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div className="chat-container">
+        <h3>Chat with User {userId}</h3>
+        <div className="message-box">
+          {messages.length > 0 ? (
+            messages.map((message, index) => (
+              <div
+                key={index}
+                className={`message ${
+                  message.senderId === currentUserId ? "sent" : "received"
+                }`}
+              >
+                <p>{message.message}</p>
+                <span className="timestamp">
+                  {new Date(message.createdAt).toLocaleTimeString()}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p>No messages yet. Start the conversation!</p>
+          )}
+        </div>
+        <MessageSend
+          userId={userId} // Pass receiver's userId as a prop
+          socket={socket}
+          setMessages={setMessages}
+          currentUserId={currentUserId} // Pass currentUserId as a prop
+        />
       </div>
-      <MessageSend
-        userId={userId} // Pass receiver's userId as a prop
-        socket={socket}
-        setMessages={setMessages}
-        currentUserId={currentUserId} // Pass currentUserId as a prop
-      />
-    </div>
+    </>
   );
 };
 

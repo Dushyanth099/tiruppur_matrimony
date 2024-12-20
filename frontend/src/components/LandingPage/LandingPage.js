@@ -119,6 +119,27 @@ const LandingPage = () => {
                   </button>
                 </Link>
               </div>
+              <div className="mb-3">
+                <Link to="/current-user">
+                  <button className="btn btn-secondary w-100 mt-3 profile-border">
+                    Profile
+                  </button>
+                </Link>
+              </div>
+              <div className="mb-3">
+                <Link to="/update-profile">
+                  <button className="btn btn-secondary w-100 mt-3">
+                    EditProfile
+                  </button>
+                </Link>
+              </div>
+              <div className="mb-3">
+                <Link to="/search">
+                  <button className="btn btn-secondary w-100 mt-3">
+                    Advanced Search
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
 
