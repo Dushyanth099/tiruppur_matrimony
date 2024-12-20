@@ -45,18 +45,29 @@ io.on("connection", (socket) => {
   });
 
   // Handle sending messages
-  socket.on("sendMessage", async ({ sender, receiver, message }) => {
+  socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
+    if (!message || !receiverId || !senderId) {
+      console.error("Missing senderId, receiverId, or message");
+      console.log("Socket sendMessage data:", {
+        senderId,
+        receiverId,
+        message,
+      });
+      return;
+    }
+
     try {
       // Save message to the database
-      const newMessage = new Message({ sender, receiver, message });
-      await newMessage.save();
-
-      // Emit message to the receiver's room
-      io.to(receiver).emit("receiveMessage", {
-        sender,
-        message,
-        timestamp: new Date(),
+      const newMessage = new Message({
+        senderId,
+        receiverId,
+        message: message.trim(),
       });
+      await newMessage.save();
+      console.log("Message Saved:", newMessage);
+      // Emit message to the sender and  receiver's room
+      io.to(senderId).emit("receiveMessage", newMessage);
+      io.to(receiverId).emit("receiveMessage", newMessage);
     } catch (error) {
       console.error("Error saving message:", error);
     }
@@ -74,4 +85,4 @@ mongoose
 // Start the server
 server.listen(port, () => console.log(`Server running on port ${port}`));
 
-module.exports = { app, server };
+module.exports = { app, server, io };

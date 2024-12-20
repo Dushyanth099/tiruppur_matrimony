@@ -35,7 +35,7 @@ const LandingPage = () => {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/chat">
+              <a className="nav-link" href="/chat/:userId">
                 Chat
               </a>
             </li>

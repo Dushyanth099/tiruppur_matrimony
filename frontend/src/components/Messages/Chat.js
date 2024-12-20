@@ -1,82 +1,123 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import MessageSend from "./MessageSend";
+import { io } from "socket.io-client";
+import { jwtDecode } from "jwt-decode"; // Correct import
 import axios from "axios";
-import socket from "./Socket";
-import handleMessage from "./SendMessages"; // Import the handleMessage function
-
-const Chat = ({ userId, selectedUserId }) => {
+import "./Chat.css";
+const Chat = () => {
+  const { userId } = useParams(); // Receiver's userId
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [socket, setSocket] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  console.log("Receiver userId from URL:", userId); // Debug log
+
+  // Decode JWT to get the current user's ID
+  const token = localStorage.getItem("token");
+  let currentUserId = null;
+
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      currentUserId = decodedToken.userId; // Adjust based on your JWT structure
+    } catch (err) {
+      console.error("Error decoding token:", err);
+    }
+  } else {
+    console.error("Authorization token is missing");
+  }
+
+  // Initialize socket connection
   useEffect(() => {
-    // Join chat room
-    const room = [userId, selectedUserId].sort().join("-");
-    socket.emit("joinRoom", room);
+    const socketInstance = io("http://localhost:5000");
 
-    // Fetch chat history
+    if (currentUserId) {
+      // Join the user's personal room
+      socketInstance.emit("joinUser", currentUserId);
+
+      // Listen for new messages
+      socketInstance.on("receiveMessage", (newMessage) => {
+        console.log("New message received via socket:", newMessage);
+
+        // Update the messages state
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      });
+    }
+
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, [currentUserId]);
+
+  // Fetch messages on component load and when userId changes
+  useEffect(() => {
     const fetchMessages = async () => {
+      if (!userId) {
+        console.error("Receiver ID (userId) is undefined!");
+        return;
+      }
+
       try {
         const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("User not logged in.");
-        }
+        if (!token) throw new Error("Authorization token is missing");
+
         const response = await axios.get(
-          `http://localhost:5000/api/user/chat/${userId}/${selectedUserId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `http://localhost:5000/api/user/messages/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log("Fetched messages:", response.data);
         setMessages(response.data);
       } catch (err) {
-        console.error("Error fetching messages:", err);
+        console.error("Error fetching messages:", err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchMessages();
+  }, [userId]);
 
-    // Listen for new messages
-    socket.on("receiveMessage", (message) => {
-      setMessages((prev) => [...prev, message]);
-    });
+  // Render Loading State
+  if (loading) {
+    return (
+      <div className="chat-container">
+        <p>Loading chat...</p>
+      </div>
+    );
+  }
 
-    return () => {
-      socket.off("receiveMessage");
-    };
-  }, [userId, selectedUserId]);
-
-  // Call handleMessage function to send a message
-  const handleSendMessage = handleMessage(
-    userId,
-    selectedUserId,
-    newMessage,
-    setMessages,
-    setNewMessage
-  );
-
+  // Render Chat Interface
   return (
     <div className="chat-container">
-      <div className="messages">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`message ${msg.sender === userId ? "sent" : "received"}`}
-          >
-            <p>{msg.content}</p>
-            <span className="timestamp">
-              {new Date(msg.timestamp).toLocaleTimeString()}
-            </span>
-          </div>
-        ))}
+      <h3>Chat with User {userId}</h3>
+      <div className="message-box">
+        {messages.length > 0 ? (
+          messages.map((message, index) => (
+            <div
+              key={index}
+              className={`message ${
+                message.senderId === currentUserId ? "sent" : "received"
+              }`}
+            >
+              <p>{message.message}</p>
+              <span className="timestamp">
+                {new Date(message.createdAt).toLocaleTimeString()}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p>No messages yet. Start the conversation!</p>
+        )}
       </div>
-
-      <div className="message-input">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message"
-        />
-        <button onClick={handleSendMessage}>Send</button>
-      </div>
+      <MessageSend
+        userId={userId} // Pass receiver's userId as a prop
+        socket={socket}
+        setMessages={setMessages}
+        currentUserId={currentUserId} // Pass currentUserId as a prop
+      />
     </div>
   );
 };

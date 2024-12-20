@@ -80,9 +80,20 @@ const Profilecards = ({ showNavbar = true }) => {
           </p>
           {/* Add Interest Button */}
           <SendInterestButton receiverId={userData._id} />
-            {/* Favorite Icon */}
-          <AddFavorite userId={userData._id} /> {/* Use AddFavorite Component */}
-          
+          {/* Favorite Icon */}
+          <AddFavorite userId={userData._id} /> {/* add messsage  */}
+          <button
+            className="btn btn-primary mt-2"
+            onClick={() => {
+              if (userData && userData._id) {
+                navigate(`/chat/${userData._id}`);
+              } else {
+                console.error("Receiver user ID is missing!");
+              }
+            }}
+          >
+            Message
+          </button>
           {/* Detailed Info with Toggle */}
           {expandedIndex === index ? (
             <>

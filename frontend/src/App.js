@@ -38,7 +38,7 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/recent" element={<Recentposts />} />
         <Route path="/favorites" element={<FavouriteNotification />} />
-        <Route path="/chat" element={<Chat />} />
+        <Route path="/chat/:userId" element={<Chat />} />
       </Routes>
     </div>
   );

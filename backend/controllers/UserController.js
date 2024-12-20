@@ -133,38 +133,64 @@ exports.removeFavorites = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+// Send a message
 exports.sendMessage = async (req, res) => {
-  const { user1Id, user2Id } = req.params;
+  const { receiverId, message } = req.body; // receiverId is the biodataId
+  const senderId = req.user.userId; // Extracted from the JWT token
 
-  try {
-    const messages = await Message.find({
-      $or: [
-        { senderId: user1Id, receiverId: user2Id }, // Ensure fields match
-        { senderId: user2Id, receiverId: user1Id }, // Ensure fields match
-      ],
-    }).sort({ createdAt: 1 });
-
-    res.status(200).json(messages);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error fetching chat history" });
+  console.log("SendMessage Request Received:", req.body);
+ if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+   return res.status(400).json({ message: "Invalid receiverId format" });
+ }
+  if (!receiverId || !message) {
+    console.log("Missing required fields:", { receiverId, message });
+    return res
+      .status(400)
+      .json({ message: "Receiver ID and message are required" });
   }
-};
-
-exports.receiveMessage = async (req, res) => {
-  const { senderId, receiverId, content } = req.body; // Ensure correct field names
-
   try {
+    // Save the message
     const newMessage = new Message({
-      senderId, // Correct field name
-      receiverId, // Correct field name
-      content, // Correct field name
+      senderId,
+      receiverId, // Save the actual userId of the receiver
+      message: message.trim(),
     });
 
     await newMessage.save();
-    res.status(201).json(newMessage);
+    console.log("Message Saved:", newMessage);
+
+    res.status(200).json(newMessage);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error sending message" });
+    console.error("Error saving message:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getMessages = async (req, res) => {
+  const senderId = req.user.userId; // Current logged-in user
+  const receiverUserId = req.params.userId; // receiverId from URL (biodataId)
+  console.log("Received userId:", req.params.userId);
+  console.log("JWT UserId:", req.user.userId);
+
+  console.log("Fetching messages between:", { senderId, receiverUserId });
+  if (!receiverUserId) {
+    return res.status(400).json({ message: "Receiver ID is required" });
+  }
+
+  try {
+    console.log("Fetching messages between:", { senderId, receiverUserId });
+    // Find messages between the sender and receiver
+    const messages = await Message.find({
+      $or: [
+        { senderId, receiverId: receiverUserId },
+        { senderId: receiverUserId, receiverId: senderId },
+      ],
+    }).sort({ createdAt: 1 });
+
+    console.log("Fetched Messages:", messages);
+    res.status(200).json(messages);
+  } catch (err) {
+    console.error("Error fetching messages:", err.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
